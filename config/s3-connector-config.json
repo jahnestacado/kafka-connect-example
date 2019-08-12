@@ -1,0 +1,24 @@
+{
+  "name": "quickstart",
+  "config": {
+    "connector.class": "io.confluent.connect.s3.S3SinkConnector",
+    "storage.class": "io.confluent.connect.s3.storage.S3Storage",
+    "tasks.max": "1",
+    "topics": "test",
+    "s3.region": "eu-central-1",
+    "s3.bucket.name": "bucketA",
+    "s3.part.size": "5242880",
+    "flush.size": "3",
+    "format.class": "io.confluent.connect.s3.format.json.JsonFormat",
+    "partitioner.class": "io.confluent.connect.storage.partitioner.TimeBasedPartitioner",
+    "path.format": "'date'=YYYY-MM-dd",
+    "partition.duration.ms": "3600000",
+    "timestamp.extractor": "Record",
+    "schema.compatibility": "NONE",
+    "name": "quickstart",
+    "store.url": "http://192.168.1.104:8000",
+    "locale": "en",
+    "timezone": "UTC",
+    "rotate.interval.ms": "60000"
+  }
+}

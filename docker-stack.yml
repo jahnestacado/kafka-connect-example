@@ -1,0 +1,86 @@
+version: "3"
+services:
+  zoo1:
+    image: zookeeper
+    hostname: zoo1
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+
+  kafka-1:
+    image: confluentinc/cp-kafka:5.0.0
+    hostname: kafka-1
+    depends_on:
+      - zoo1
+    ports:
+      - "19092:19092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://$HOST_IP:19092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 2
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 2
+    # volumes:
+    #   - /home/jahn/volumes/kafka/1/:/var/lib/kafka/data
+
+  kafka-2:
+    image: confluentinc/cp-kafka:5.0.0
+    hostname: kafka-2
+    depends_on:
+      - zoo1
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zoo1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://$HOST_IP:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 2
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 2
+    # volumes:
+    #   - /home/jahn/volumes/kafka/2/:/var/lib/kafka/data
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry
+    depends_on:
+      - zoo1
+      - kafka-1
+      - kafka-2
+    ports:
+      - "8085:8085"
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zoo1:2181
+      SCHEMA_REGISTRY_HOST_NAME: "schema-registry"
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8085
+      SCHEMA_REGISTRY_DEBUG: "true"
+
+  connect:
+    image: confluentinc/cp-kafka-connect:5.3.0
+    ports:
+      - "8083:8083"
+    command: bash config/docker_entrypoint.sh
+    environment:
+      AWS_ACCESS_KEY_ID: "OVUG6O96P34J7DK875ZD"
+      AWS_SECRET_ACCESS_KEY: "ve1LC6bQ9VdMJdnApHJxWjO90cx8MEWFtjyCCpYg"
+      CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092
+      CONNECT_GROUP_ID: cp-kafka-connect
+      CONNECT_CONFIG_STORAGE_TOPIC: dev_cp-kafka-connect-config
+      CONNECT_OFFSET_STORAGE_TOPIC: dev_cp-kafka-connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: dev_cp-kafka-connect-status
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_REST_ADVERTISED_HOST_NAME: localhost
+      CONNECT_PLUGIN_PATH: /usr/share/java/
+      CONNECT_ZOOKEEPER_CONNECT: "zoo1:2181"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+    volumes:
+      - /home/jahn/code/kafka-stack/config:/config
+    # - /home/jahn/code/kafka-stack/jars:etc/kafka-connect/jars00
