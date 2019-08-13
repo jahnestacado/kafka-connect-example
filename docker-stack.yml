@@ -60,17 +60,15 @@ services:
     image: confluentinc/cp-kafka-connect:5.3.0
     ports:
       - "8083:8083"
-    command: bash config/docker_entrypoint.sh
+    command: bash config/activate-connector.sh
     environment:
-      AWS_ACCESS_KEY_ID: "OVUG6O96P34J7DK875ZD"
-      AWS_SECRET_ACCESS_KEY: "ve1LC6bQ9VdMJdnApHJxWjO90cx8MEWFtjyCCpYg"
+      AWS_ACCESS_KEY_ID: "92LQPWPI8AFQ5JTZE6U7"
+      AWS_SECRET_ACCESS_KEY: "O2SNXxE8yNcZVM5BOYLvvi5QjRORNyHMJjJuOUsz"
       CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092
       CONNECT_GROUP_ID: cp-kafka-connect
       CONNECT_CONFIG_STORAGE_TOPIC: dev_cp-kafka-connect-config
       CONNECT_OFFSET_STORAGE_TOPIC: dev_cp-kafka-connect-offsets
       CONNECT_STATUS_STORAGE_TOPIC: dev_cp-kafka-connect-status
-      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
-      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
       CONNECT_REST_ADVERTISED_HOST_NAME: localhost
       CONNECT_PLUGIN_PATH: /usr/share/java/
       CONNECT_ZOOKEEPER_CONNECT: "zoo1:2181"
@@ -80,7 +78,9 @@ services:
       CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
-      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "true"
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8085
     volumes:
-      - /home/jahn/code/kafka-stack/config:/config
-    # - /home/jahn/code/kafka-stack/jars:etc/kafka-connect/jars00
+      - ./config:/config
