@@ -9,6 +9,7 @@
     "s3.region": "eu-central-1",
     "s3.bucket.name": "kafka-source",
     "s3.part.size": "5242880",
+    "s3.compression.type": "gzip",
     "flush.size": "10",
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
