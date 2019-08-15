@@ -1,9 +1,0 @@
-{
-  "namespace": "message-1.avro",
-  "type": "record",
-  "name": "Message1",
-  "fields": [
-    { "name": "key", "type": "string" },
-    { "name": "value", "type": ["int", "null"] }
-  ]
-}

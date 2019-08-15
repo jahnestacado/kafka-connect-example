@@ -7,11 +7,11 @@ from confluent_kafka import avro
 from confluent_kafka.avro import AvroProducer
 
 # Kafka topic
-TOPIC = "topic-2"
+TOPIC = "avro-topic"
 
 # Path to user.avsc avro schema
-SCHEMA_PATH = "message-2.avsc"
-SCHEMA = avro.loads(open(SCHEMA_PATH).read())
+SCHEMA_PATH = "avro-message.avsc"
+SCHEMA = value_schema = avro.loads(open(SCHEMA_PATH).read())
 
 avroProducer = AvroProducer({
     'bootstrap.servers': '192.168.1.104:19092',
@@ -23,6 +23,4 @@ while True:
     value={"key": "key-" + str(random.randint(0, 10)), "value": random.randint(0, 1000)}
     print(value)
     avroProducer.produce(topic=TOPIC, value=value)
-    time.sleep(random.randint(0, 5))
-
-avroProducer.flush()
+    time.sleep(random.randint(0, 3))

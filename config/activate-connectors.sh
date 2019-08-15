@@ -1,4 +1,7 @@
 #/bin/bash
+
+set +x
+
 KAFKA_CONNECT_ENDPOINT=http://localhost:8083/connectors
 /etc/confluent/docker/run &
 while [ $(curl -s -o /dev/null -w %{http_code} $KAFKA_CONNECT_ENDPOINT ) -ne 200 ] ; do
@@ -7,9 +10,11 @@ while [ $(curl -s -o /dev/null -w %{http_code} $KAFKA_CONNECT_ENDPOINT ) -ne 200
     sleep 5
 done
 echo -e "\n[✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓] Kafka Connect endpoint is available"
-echo -e "\n[✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓] Activating Kafka Connect S3 sink"
-curl -s -X POST -H "Content-Type: application/json" -d @config/s3-connector-config.json $KAFKA_CONNECT_ENDPOINT
+echo -e "\n[✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓] Activating Kafka S3 AVRO connector"
+curl -s -X POST -H "Content-Type: application/json" -d @config/s3-avro-connector-config.json $KAFKA_CONNECT_ENDPOINT
+echo -e "\n[✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓] Activating Kafka S3 JSON connector"
+curl -s -X POST -H "Content-Type: application/json" -d @config/s3-json-connector-config.json $KAFKA_CONNECT_ENDPOINT
 sleep infinity
 
 
-# curl -X DELETE http://localhost:8083/connectors/quickstart
+# curl -X DELETE http://localhost:8083/connectors/s3-avro-connector
