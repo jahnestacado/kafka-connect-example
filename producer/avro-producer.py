@@ -14,8 +14,8 @@ SCHEMA_PATH = "avro-message.avsc"
 SCHEMA = value_schema = avro.loads(open(SCHEMA_PATH).read())
 
 avroProducer = AvroProducer({
-    'bootstrap.servers': '192.168.1.104:19092',
-    'schema.registry.url': 'http://192.168.1.104:8085'
+    'bootstrap.servers': 'localhost:19092',
+    'schema.registry.url': 'http://localhost:8085'
     },  default_value_schema=SCHEMA)
 
 

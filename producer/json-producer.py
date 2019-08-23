@@ -8,7 +8,7 @@ import json
 TOPIC = "json-topic"
 
 producer = Producer({
-    'bootstrap.servers': '192.168.1.104:19092',
+    'bootstrap.servers': 'localhost:19092',
     })
 
 
