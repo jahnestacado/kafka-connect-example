@@ -54,18 +54,29 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8085
       SCHEMA_REGISTRY_DEBUG: "true"
 
-  connect:
+  connect-worker-0:
     image: confluentinc/cp-kafka-connect:5.3.0
     ports:
       - "8083:8083"
-    command: bash config/activate-connectors.sh
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://doctor-kafka-connect-0:18083/healthcheck/s3-json-connector",
+        ]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+    command: bash scripts/activate-connectors.sh
     depends_on:
       - zoo1
       - kafka-1
       - kafka-2
     environment:
-      AWS_ACCESS_KEY_ID: "G7MU7YIAXKY9ZO6XDOX7"
-      AWS_SECRET_ACCESS_KEY: "p4YbIie6MiFtILozVjBuXmite65ZbIWnVwOPy0q7"
+      AWS_ACCESS_KEY_ID: "XQN5VEB1J12S31GMNRAU"
+      AWS_SECRET_ACCESS_KEY: "4u0Fn1OYJ6qRiyn86mYw3rLoTfbr9Q25pLQ3gH1Y"
       CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092
       CONNECT_GROUP_ID: cp-kafka-connect
       CONNECT_CONFIG_STORAGE_TOPIC: dev_cp-kafka-connect-config
@@ -86,21 +97,46 @@ services:
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "true"
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8085
-      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect-worker-0
+      CONNECT_REST_ADVERTISED_PORT: 8083
+      CONNECT_REST_PORT: 8083
     volumes:
-      - ./config:/config
+      - ./scripts:/scripts
+      - ./connector-config:/connector-config
 
-  connect-worker:
+  doctor-kafka-connect-0:
+    image: jahnestacado/doctor-kafka-connect:1.0.0
+    ports:
+      - "18083:18083"
+    environment:
+      LOG_LEVEL: DEBUG
+      KAFKA_CONNECT_HOSTNAME: connect-worker-0
+      KAFKA_CONNECT_PORT: 8083
+      HEALTHCHECK_PORT: 18083
+      KAFKA_CONNECT_TARGET_WORKER_IDS: connect-worker-0:8083
+
+  connect-worker-1:
     image: confluentinc/cp-kafka-connect:5.3.0
     ports:
       - "8089:8089"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://doctor-kafka-connect-1:18084/healthcheck/s3-json-connector",
+        ]
+      interval: 3m30s
+      timeout: 10s
+      retries: 3
     depends_on:
       - zoo1
       - kafka-1
       - kafka-2
     environment:
-      AWS_ACCESS_KEY_ID: "G7MU7YIAXKY9ZO6XDOX7"
-      AWS_SECRET_ACCESS_KEY: "p4YbIie6MiFtILozVjBuXmite65ZbIWnVwOPy0q7"
+      AWS_ACCESS_KEY_ID: "XQN5VEB1J12S31GMNRAU"
+      AWS_SECRET_ACCESS_KEY: "4u0Fn1OYJ6qRiyn86mYw3rLoTfbr9Q25pLQ3gH1Y"
       CONNECT_BOOTSTRAP_SERVERS: kafka-1:19092
       CONNECT_GROUP_ID: cp-kafka-connect
       CONNECT_CONFIG_STORAGE_TOPIC: dev_cp-kafka-connect-config
@@ -121,4 +157,17 @@ services:
       CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
       CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "true"
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8085
-      CONNECT_REST_ADVERTISED_HOST_NAME: connect-worker
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect-worker-1
+      CONNECT_REST_ADVERTISED_PORT: 8084
+      CONNECT_REST_PORT: 8084
+
+  doctor-kafka-connect-1:
+    image: jahnestacado/doctor-kafka-connect:1.0.0
+    ports:
+      - "18084:18084"
+    environment:
+      LOG_LEVEL: DEBUG
+      KAFKA_CONNECT_HOSTNAME: connect-worker-1
+      KAFKA_CONNECT_PORT: 8084
+      HEALTHCHECK_PORT: 18084
+      KAFKA_CONNECT_TARGET_WORKER_IDS: connect-worker-1:8084
