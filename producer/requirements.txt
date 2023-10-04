@@ -1,2 +1,2 @@
-avro==1.8.1
+avro==1.11.3
 confluent_kafka==1.1.0
